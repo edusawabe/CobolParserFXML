@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.text.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.input.*?>
+<?import javafx.scene.control.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.layout.AnchorPane?>
+
+<AnchorPane prefHeight="600.0" prefWidth="820.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="cobolparser.MainGUIController">
+   <children>
+      <BorderPane prefHeight="313.0" prefWidth="396.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+         <top>
+            <MenuBar BorderPane.alignment="CENTER">
+              <menus>
+                <Menu mnemonicParsing="false" text="File">
+                  <items>
+                        <MenuItem fx:id="miOpen" mnemonicParsing="false" onAction="#abrirPasta" text="Open" />
+                    <MenuItem fx:id="miClose" mnemonicParsing="false" text="Close">
+                           <accelerator>
+                              <KeyCodeCombination alt="ANY" code="F4" control="UP" meta="UP" shift="UP" shortcut="UP" />
+                           </accelerator>
+                        </MenuItem>
+                  </items>
+                </Menu>
+              </menus>
+            </MenuBar>
+         </top>
+         <bottom>
+            <VBox prefHeight="200.0" prefWidth="100.0" BorderPane.alignment="CENTER">
+               <children>
+                  <HBox minWidth="800.0" prefHeight="45.0" prefWidth="800.0">
+                     <children>
+                        <Label text="Gerar XML:">
+                           <HBox.margin>
+                              <Insets left="10.0" top="15.0" />
+                           </HBox.margin>
+                           <font>
+                              <Font name="System Bold" size="12.0" />
+                           </font>
+                        </Label>
+                        <RadioButton fx:id="rbGerarXMLSim" mnemonicParsing="false" text="Sim">
+                           <HBox.margin>
+                              <Insets left="10.0" top="15.0" />
+                           </HBox.margin>
+                        </RadioButton>
+                        <RadioButton fx:id="rbGerarXMLNao" mnemonicParsing="false" text="Não">
+                           <HBox.margin>
+                              <Insets left="10.0" top="15.0" />
+                           </HBox.margin>
+                        </RadioButton>
+                        <Button fx:id="btProcessar" mnemonicParsing="false" onAction="#processarArquivos" styleClass="painelInferior" stylesheets="@application.css" text="Processar Arquivos">
+                           <HBox.margin>
+                              <Insets left="10.0" top="10.0" />
+                           </HBox.margin>
+                        </Button>
+                        <Button fx:id="btDetProg" layoutX="20.0" layoutY="20.0" mnemonicParsing="false" styleClass="painelInferior" stylesheets="@application.css" text="Detalhar Programa">
+                           <HBox.margin>
+                              <Insets left="10.0" top="10.0" />
+                           </HBox.margin>
+                        </Button>
+                     </children>
+                  </HBox>
+                  <HBox minWidth="800.0" prefHeight="40.0" prefWidth="800.0">
+                     <children>
+                        <Label text="Arquivos Processados:">
+                           <HBox.margin>
+                              <Insets left="10.0" right="10.0" top="10.0" />
+                           </HBox.margin>
+                           <font>
+                              <Font name="System Bold" size="12.0" />
+                           </font>
+                        </Label>
+                        <StackPane>
+                           <children>
+                              <ProgressBar fx:id="pbProcessados" prefHeight="18.0" prefWidth="286.0" progress="0.0" />
+                              <Label fx:id="lbProcessados" alignment="CENTER" prefHeight="17.0" prefWidth="206.0" text="0/0">
+                                 <font>
+                                    <Font name="System Bold" size="12.0" />
+                                 </font>
+                              </Label>
+                           </children>
+                           <HBox.margin>
+                              <Insets top="10.0" />
+                           </HBox.margin>
+                        </StackPane>
+                     </children>
+                  </HBox>
+                  <TextArea fx:id="taAreatexto" prefHeight="200.0" prefWidth="200.0">
+                     <VBox.margin>
+                        <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                     </VBox.margin>
+                  </TextArea>
+               </children>
+            </VBox>
+         </bottom>
+         <center>
+            <VBox prefHeight="200.0" prefWidth="100.0" BorderPane.alignment="CENTER">
+               <children>
+                  <Label fx:id="lbDir" prefHeight="20.0" prefWidth="764.0" text="Diretório: ">
+                     <font>
+                        <Font name="System Bold" size="14.0" />
+                     </font>
+                     <VBox.margin>
+                        <Insets left="10.0" right="10.0" top="5.0" />
+                     </VBox.margin>
+                  </Label>
+                  <TableView fx:id="tvTabProgs" prefHeight="1000.0" prefWidth="800.0">
+                    <columns>
+                      <TableColumn fx:id="tcColunaArquivo" maxWidth="-1.0" minWidth="350.0" prefWidth="350.0" text="Arquivo" />
+                      <TableColumn fx:id="tcColunaNome" maxWidth="-1.0" minWidth="350.0" prefWidth="350.0" text="Nome Programa" />
+                        <TableColumn fx:id="tcColunaStatus" prefWidth="100.0" text="Status" />
+                    </columns>
+                     <VBox.margin>
+                        <Insets left="10.0" right="10.0" />
+                     </VBox.margin>
+                  </TableView>
+               </children>
+            </VBox>
+         </center>
+      </BorderPane>
+   </children>
+</AnchorPane>

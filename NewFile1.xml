@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Root xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="Teste.xsd">
+	<item>
+		<NomeComponente>RFIN102F</NomeComponente>
+		<AlterouPDC>Não</AlterouPDC>
+		<BookEntradaAlterado>Não</BookEntradaAlterado>
+		<BookSaidaAlterado>Não</BookSaidaAlterado>
+		<FluxoPDCAlterado>Não</FluxoPDCAlterado>
+		<PacoteChangeman>RFIN000487</PacoteChangeman>
+		<Demanda>TH</Demanda>
+		<DataImplantacao>Proxima</DataImplantacao></item></Root>

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/jdk1.8.0_65"/>
+	<classpathentry kind="con" path="org.eclipse.fx.ide.jdt.core.JAVAFX_CONTAINER"/>
+	<classpathentry kind="lib" path="C:/Jars/koopa.jar"/>
+	<classpathentry kind="lib" path="C:/Jars/log4j-1.2.16.jar"/>
+	<classpathentry kind="lib" path="C:/Jars/postgresql-9.4-1203.jdbc41.jar"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tns:root xmlns:tns="http://www.example.org/Alterações" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.example.org/Alterações Alterações.xsd ">
+  <tns:NomeComponente>tns:NomeComponente</tns:NomeComponente>
+  <tns:AlterouPDC>tns:AlterouPDC</tns:AlterouPDC>
+  <tns:BookEntradaAlterado>tns:BookEntradaAlterado</tns:BookEntradaAlterado>
+  <tns:BookSaidaAlterado>tns:BookSaidaAlterado</tns:BookSaidaAlterado>
+  <tns:FluxoProcessoPDC>tns:FluxoProcessoPDC</tns:FluxoProcessoPDC>
+  <tns:PacoteChangeman>tns:PacoteChangeman</tns:PacoteChangeman>
+  <tns:Demanda>tns:Demanda</tns:Demanda>
+  <tns:DataImplantacao>tns:DataImplantacao</tns:DataImplantacao>
+</tns:root>
