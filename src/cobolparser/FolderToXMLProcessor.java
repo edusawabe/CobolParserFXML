@@ -119,7 +119,6 @@ public class FolderToXMLProcessor {
      * @param file - the index of the file to be processed
      */
     public String processAndCreateFile(int file) throws IOException{
-        String programs = new String();
         int j = file;
         CobolProgram pgm = new CobolProgram();
         int i = 0;
@@ -131,21 +130,16 @@ public class FolderToXMLProcessor {
 				if (outFile.exists() && !skipExistingFile) {
 					outFile.createNewFile();
 					processFile(lFile1, outFile, coordinator);
-					pgm = docBuilder.buildFile(outFile);
-					db2Driver.insertUpdateDeleteStatement(
-							StatementCreator.generateInsertProgramStatement(pgm.getProgramName(), ""));
-					programs = programs + pgm.toString();
-					i++;
 				}
 				if (!outFile.exists()) {
 					outFile.createNewFile();
 					processFile(lFile1, outFile, coordinator);
 					pgm = docBuilder.buildFile(outFile);
-					programs = programs + pgm.toString();
-					db2Driver.insertUpdateDeleteStatement(
-							StatementCreator.generateInsertProgramStatement(pgm.getProgramName(), ""));
-					i++;
 				}
+				pgm = docBuilder.buildFile(outFile);
+				db2Driver.insertUpdateDeleteStatement(
+						StatementCreator.generateInsertProgramStatement(pgm.getProgramName(), ""));
+
 			} catch (IOException ex) {
 				Logger.getLogger(FolderToXMLProcessor.class.getName()).log(Level.SEVERE, null, ex);
 			}

@@ -137,9 +137,10 @@ public class MainGUIController implements Initializable{
 			a.show();
 			return;
 		}
-
+		taAreatexto.setText("");
 		if (dir != null) {
 			if (dir.exists()) {
+				lbProcessados.setText("0/" + olTabelaProgramas.size());
 				folderProcessor = new FolderToXMLProcessor();
 				folderProcessor.setFolder(dir);
 				folderProcessor.setOlTabelaProgramas(olTabelaProgramas);
@@ -164,8 +165,6 @@ public class MainGUIController implements Initializable{
 					}
 				}));
 				processWorker.playFromStart();
-
-				taAreatexto.setText(folderProcessor.getProcessResult());
 			}
 		}
 	}
@@ -175,21 +174,19 @@ public class MainGUIController implements Initializable{
 			processWorker.stop();
 			return;
 		} else {
-			if ((!files[fileInProcess].getName().contains(".xml")) && files[fileInProcess].isFile()
-					&& (!files[fileInProcess].getName().contains("RFINW"))) {
-				taAreatexto.setText("");
-				lbProcessados.setText("0/" + olTabelaProgramas.size());
+			if ((!tvTabProgs.getItems().get(fileInProcess).getArquivo().contains(".xml"))
+					&& (!tvTabProgs.getItems().get(fileInProcess).getArquivo().contains("RFINW"))) {
+
 				ds = ds.parseDouble("" + olTabelaProgramas.size());
-				taAreatexto.setText(taAreatexto.getText() + folderProcessor.processAndCreateFile(fileInProcess));
+				taAreatexto.setText(taAreatexto.getText() + "\n" +folderProcessor.processAndCreateFile(fileInProcess));
 				di = di.parseDouble("" + fileInProcess);
 				di = di + 1;
 				pbProcessados.setProgress(di / ds);
-				lbProcessados.setText("" + fileInProcess + "/" + olTabelaProgramas.size());
+				lbProcessados.setText("Arquivos Processados: " + fileInProcess + "/" + (olTabelaProgramas.size()-1));
 				tvTabProgs.scrollTo(fileInProcess);
-				tvTabProgs.getSelectionModel().focus(fileInProcess);
-				tvTabProgs.refresh();
+
 			}
-			fileInProcess++;
+			fileInProcess = fileInProcess + 1;
 		}
 	}
 
@@ -208,7 +205,7 @@ public class MainGUIController implements Initializable{
 				di = di.parseDouble("" + indFile);
 				di = di + 1;
 				pbProcessados.setProgress(di / ds);
-				lbProcessados.setText("Carregando Arquivos:" + indFile + "/" + totalFiles);
+				lbProcessados.setText("Carregando Arquivos:" + indFile + "/" + (totalFiles - 1));
 				tvTabProgs.scrollTo(indFile);
 			}
 			indFile++;
