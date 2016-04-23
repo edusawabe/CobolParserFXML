@@ -8,10 +8,13 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
 
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.event.Event;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.Node;
@@ -30,6 +33,7 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Window;
+import javafx.util.Duration;
 
 public class MainGUIController implements Initializable{
 	@FXML
@@ -65,7 +69,14 @@ public class MainGUIController implements Initializable{
 	private File dir;
 	private FolderToXMLProcessor folderProcessor;
 	private DBDriver dbDriver;
-	private Task processWorker;
+	private Timeline processWorker;
+	private Timeline oPenProcess;
+	private int fileInProcess;
+	private int indFile;
+	private File[] files;
+	private Double di = new Double("0");
+	private Double ds = new Double("0");
+	private int totalFiles;
 
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
@@ -85,37 +96,34 @@ public class MainGUIController implements Initializable{
 		DirectoryChooser dch = new DirectoryChooser();
 		dch.setInitialDirectory(new File("C:\\E!SuperCopia"));
 		dir = dch.showDialog(lbDir.getScene().getWindow());
+		indFile = 0;
+
 		if (dir == null)
 			return;
 		lbDir.setText("Diretorio: " + dir.getAbsolutePath());
-
-		File[] files = dir.listFiles();
+		files = dir.listFiles();
 
 		for (int i = 0; i < files.length; i++) {
-			if ((!files[i].getName().contains(".xml")) && files[i].isFile()) {
-				ProgramsTableLine pgmLine = new ProgramsTableLine();
-				pgmLine.setArquivo(files[i].getAbsolutePath());
-				olTabelaProgramas.add(pgmLine);
-				tvTabProgs.setItems(olTabelaProgramas);
-			}
+			if ((!files[i].getName().contains(".xml")) && files[i].isFile() && (!files[i].getName().contains("RFINW")))
+				totalFiles++;
 		}
+		totalFiles--;
 
-/*		Task<String> t = new Task<String>() {
-
+		oPenProcess = new Timeline();
+		oPenProcess.setCycleCount(Timeline.INDEFINITE);
+		oPenProcess.getKeyFrames().add(new KeyFrame(Duration.seconds(0.1), new EventHandler() {
+			// KeyFrame event handler
 			@Override
-			protected String call() throws Exception {
-				for (int i = 0; i < files.length; i++) {
-					if (!files[i].getName().contains(".xml")) {
-						ProgramsTableLine pgmLine = new ProgramsTableLine();
-						pgmLine.setArquivo(files[i].getAbsolutePath());
-						olTabelaProgramas.add(pgmLine);
-						tvTabProgs.setItems(olTabelaProgramas);
-					}
+			public void handle(Event event) {
+				try {
+					doOpenDir();
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
 				}
-				return "OK";
 			}
-		};*/
-
+		}));
+		oPenProcess.playFromStart();
 	}
 
 	@FXML
@@ -123,6 +131,7 @@ public class MainGUIController implements Initializable{
 		Alert a = new Alert(AlertType.ERROR);
 		a.setTitle("Selecionar Opção de XML");
 		a.setContentText("Favor Selecionar Uma das opções de Gerar XML.");
+		fileInProcess = 0;
 
 		if(!rbGerarXMLNao.isSelected() && !rbGerarXMLSim.isSelected()){
 			a.show();
@@ -139,37 +148,70 @@ public class MainGUIController implements Initializable{
 				if (rbGerarXMLNao.isSelected())
 					folderProcessor.setSkipExistingFile(false);
 				folderProcessor.setDb2Driver(new DBDriver());
-				processWorker = createWorker();
-				new Thread(processWorker).start();
+
+				processWorker = new Timeline();
+				processWorker.setCycleCount(Timeline.INDEFINITE);
+				processWorker.getKeyFrames().add(new KeyFrame(Duration.seconds(0.1), new EventHandler() {
+					// KeyFrame event handler
+					@Override
+					public void handle(Event event) {
+						try {
+							doProcess();
+						} catch (Exception e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+					}
+				}));
+				processWorker.playFromStart();
+
 				taAreatexto.setText(folderProcessor.getProcessResult());
 			}
 		}
 	}
 
-	private Task createWorker() {
-        return new Task() {
-            @Override
-            protected Object call() throws Exception {
-				pbProcessados.setProgress(0);
-            	taAreatexto.setText("");
-            	lbProcessados.setText("0/" + olTabelaProgramas.size());
-            	Double di = new Double("0"), ds = new Double("0");
-            	ds = ds.parseDouble("" + olTabelaProgramas.size());
-				for (int i = 0; i < olTabelaProgramas.size(); i++) {
-					taAreatexto.setText(taAreatexto.getText() + folderProcessor.processAndCreateFile(i));
-					Thread.sleep(10);
-					di  = di.parseDouble("" + i);
-					di = di + 1;
-					pbProcessados.setProgress(di/ds);
-					lbProcessados.setText("" + i + "/" + olTabelaProgramas.size());
-					//tvTabProgs.scrollTo(i);
-					tvTabProgs.getSelectionModel().focus(i);
-					tvTabProgs.refresh();
-				}
-				pbProcessados.setProgress(1);
-				Thread.sleep(10);
-                return true;
-            }
-        };
-    }
+	private void doProcess() throws Exception {
+		if (fileInProcess >= olTabelaProgramas.size()) {
+			processWorker.stop();
+			return;
+		} else {
+			if ((!files[fileInProcess].getName().contains(".xml")) && files[fileInProcess].isFile()
+					&& (!files[fileInProcess].getName().contains("RFINW"))) {
+				taAreatexto.setText("");
+				lbProcessados.setText("0/" + olTabelaProgramas.size());
+				ds = ds.parseDouble("" + olTabelaProgramas.size());
+				taAreatexto.setText(taAreatexto.getText() + folderProcessor.processAndCreateFile(fileInProcess));
+				di = di.parseDouble("" + fileInProcess);
+				di = di + 1;
+				pbProcessados.setProgress(di / ds);
+				lbProcessados.setText("" + fileInProcess + "/" + olTabelaProgramas.size());
+				tvTabProgs.scrollTo(fileInProcess);
+				tvTabProgs.getSelectionModel().focus(fileInProcess);
+				tvTabProgs.refresh();
+			}
+			fileInProcess++;
+		}
+	}
+
+	private void doOpenDir() throws Exception {
+		if (indFile >= totalFiles) {
+			oPenProcess.stop();
+			return;
+		} else {
+			if ((!files[indFile].getName().contains(".xml")) && files[indFile].isFile()) {
+				ProgramsTableLine pgmLine = new ProgramsTableLine();
+				pgmLine.setArquivo(files[indFile].getAbsolutePath());
+				olTabelaProgramas.add(pgmLine);
+				tvTabProgs.setItems(olTabelaProgramas);
+
+				ds = ds.parseDouble("" + totalFiles);
+				di = di.parseDouble("" + indFile);
+				di = di + 1;
+				pbProcessados.setProgress(di / ds);
+				lbProcessados.setText("Carregando Arquivos:" + indFile + "/" + totalFiles);
+				tvTabProgs.scrollTo(indFile);
+			}
+			indFile++;
+		}
+	}
 }
