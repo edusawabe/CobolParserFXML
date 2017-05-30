@@ -1,24 +1,19 @@
 package cobolparser;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
+
+import org.apache.log4j.Logger;
 
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.concurrent.Task;
 import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.Node;
-import javafx.scene.Parent;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
@@ -31,8 +26,6 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.DirectoryChooser;
-import javafx.stage.FileChooser;
-import javafx.stage.Window;
 import javafx.util.Duration;
 
 public class MainGUIController implements Initializable{
@@ -68,7 +61,7 @@ public class MainGUIController implements Initializable{
 	private ObservableList<ProgramsTableLine> olTabelaProgramas = FXCollections.observableArrayList();
 	private File dir;
 	private FolderToXMLProcessor folderProcessor;
-	private DBDriver dbDriver;
+	//private DBDriver dbDriver;
 	private Timeline processWorker;
 	private Timeline oPenProcess;
 	private int fileInProcess;
@@ -77,20 +70,23 @@ public class MainGUIController implements Initializable{
 	private Double di = new Double("0");
 	private Double ds = new Double("0");
 	private int totalFiles;
+    final static Logger logger = Logger.getLogger(MainGUIController.class);
 
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
+		logger.info("Inicializando!");
 		tcColunaArquivo.setCellValueFactory(new PropertyValueFactory<ProgramsTableLine, String>("arquivo"));
 		tcColunaNome.setCellValueFactory(new PropertyValueFactory<ProgramsTableLine, String>("nomePrograma"));
 		tcColunaStatus.setCellValueFactory(new PropertyValueFactory<ProgramsTableLine, String>("status"));
 		tvTabProgs.getItems().setAll(olTabelaProgramas);
-		dbDriver = new DBDriver();
-		dbDriver.openConnection();
+		//dbDriver = new DBDriver();
+		//dbDriver.openConnection();
 	}
 
 
 	@FXML
 	private void abrirPasta(Event event){
+		logger.info("Abrindo Pasta!");
 		olTabelaProgramas.clear();
 		taAreatexto.setText("");
 		DirectoryChooser dch = new DirectoryChooser();
@@ -104,7 +100,7 @@ public class MainGUIController implements Initializable{
 		files = dir.listFiles();
 
 		for (int i = 0; i < files.length; i++) {
-			if ((!files[i].getName().contains(".xml")) && files[i].isFile() && (!files[i].getName().contains("RFINW")))
+			if ((!files[i].getName().contains(".xml")) && files[i].isFile() && (!files[i].getName().contains("RFINW")) && (!files[i].getName().contains("RPASW")))
 				totalFiles++;
 		}
 		totalFiles--;
@@ -118,8 +114,8 @@ public class MainGUIController implements Initializable{
 				try {
 					doOpenDir();
 				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					logger.error("Erro no Processo de Open", e);
+					oPenProcess.stop();
 				}
 			}
 		}));
@@ -159,8 +155,8 @@ public class MainGUIController implements Initializable{
 						try {
 							doProcess();
 						} catch (Exception e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
+							logger.error("Erro no Processo de Open", e);
+							processWorker.stop();
 						}
 					}
 				}));
@@ -191,7 +187,7 @@ public class MainGUIController implements Initializable{
 	}
 
 	private void doOpenDir() throws Exception {
-		if (indFile >= totalFiles) {
+		if (indFile >= (totalFiles+10)) {
 			oPenProcess.stop();
 			return;
 		} else {
