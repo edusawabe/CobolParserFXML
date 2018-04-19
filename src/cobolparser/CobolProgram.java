@@ -43,7 +43,7 @@ public class CobolProgram {
 
     @Override
     public String toString(){
-        String ret;
+        String ret = "";
         int k = 0;
         int p = 0;
         ret = programName;
@@ -143,6 +143,10 @@ public class CobolProgram {
         	k++;
         	p++;
         }
+
+        for (String lArq : wrkSection.getArqList()) {
+        	ret = ret + "\n" + programName + ";" + lArq;
+		}
 
         return ret;
     }
