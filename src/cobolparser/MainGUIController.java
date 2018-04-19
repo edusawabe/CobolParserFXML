@@ -2,12 +2,11 @@ package cobolparser;
 
 import java.io.File;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.LinkedList;
 import java.util.ResourceBundle;
+
 import org.apache.log4j.Logger;
+
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.collections.FXCollections;
@@ -90,6 +89,7 @@ public class MainGUIController implements Initializable{
 	}
 
 
+	@SuppressWarnings("unchecked")
 	@FXML
 	private void abrirPasta(Event event){
 		logger.info("Abrindo Pasta!");
@@ -141,6 +141,7 @@ public class MainGUIController implements Initializable{
 		rbGerarXMLNao.setSelected(false);
 	}
 
+	@SuppressWarnings("unchecked")
 	@FXML
 	private void processarArquivos(Event event){
 		Alert a = new Alert(AlertType.ERROR);
@@ -201,9 +202,9 @@ public class MainGUIController implements Initializable{
 			if ((!tvTabProgs.getItems().get(fileInProcess).getArquivo().contains(".xml"))
 					&& (!(tvTabProgs.getItems().get(fileInProcess).getArquivo().charAt(4) == 'W'))) {
 
-				ds = ds.parseDouble("" + olTabelaProgramas.size());
+				ds = Double.parseDouble("" + olTabelaProgramas.size());
 				taAreatexto.setText(taAreatexto.getText() + "\n" +folderProcessor.processAndCreateFile(fileInProcess));
-				di = di.parseDouble("" + fileInProcess);
+				di = Double.parseDouble("" + fileInProcess);
 				di = di + 1;
 				pbProcessados.setProgress(di / ds);
 				lbProcessados.setText("Arquivos Processados: " + fileInProcess + "/" + (olTabelaProgramas.size()-1));
@@ -226,8 +227,8 @@ public class MainGUIController implements Initializable{
 				olTabelaProgramas.add(pgmLine);
 				tvTabProgs.setItems(olTabelaProgramas);
 
-				ds = ds.parseDouble("" + totalFiles);
-				di = di.parseDouble("" + indFile);
+				ds = Double.parseDouble("" + totalFiles);
+				di = Double.parseDouble("" + indFile);
 				di = di + 1;
 				pbProcessados.setProgress(di / ds);
 				lbProcessados.setText("Carregando Arquivos:" + (indFile+1) + "/" + (totalFiles));

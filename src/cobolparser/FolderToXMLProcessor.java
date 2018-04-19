@@ -7,12 +7,11 @@ package cobolparser;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.LinkedList;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 import org.xml.sax.SAXException;
 
 import javafx.collections.ObservableList;
@@ -38,6 +37,7 @@ public class FolderToXMLProcessor {
     private ObservableList<ProgramsTableLine> olTabelaProgramas;
     private String processResult;
     private ParsingCoordinator coordinator;
+    final static Logger logger = Logger.getLogger(FolderToXMLProcessor.class);
 
     public FolderToXMLProcessor(){
         docBuilder = new MyDocumentBuilder();
@@ -93,7 +93,7 @@ public class FolderToXMLProcessor {
 							i++;
 						}
 					} catch (IOException | ParserConfigurationException | SAXException ex) {
-						Logger.getLogger(FolderToXMLProcessor.class.getName()).log(Level.SEVERE, null, ex);
+						logger.log(Level.ERROR, null, ex);
 						olTabelaProgramas.get(j).setStatus("Erro");
 					}
 				}
@@ -109,7 +109,7 @@ public class FolderToXMLProcessor {
 	                db2Driver.insertUpdateDeleteStatement(StatementCreator.generateInsertProgramStatement(pgm.getProgramName(), ""));
 	                programs = programs + pgm.toString();
                 } catch (ParserConfigurationException | SAXException ex) {
-                	Logger.getLogger(FolderToXMLProcessor.class.getName()).log(Level.SEVERE, null, ex);
+                	logger.log(Level.ERROR, null, ex);
 				}
             }
             if (!outFile.exists()) {
@@ -120,7 +120,7 @@ public class FolderToXMLProcessor {
 	                programs = programs + pgm.toString();
 	                db2Driver.insertUpdateDeleteStatement(StatementCreator.generateInsertProgramStatement(pgm.getProgramName(), ""));
                 } catch (ParserConfigurationException | SAXException ex) {
-                	Logger.getLogger(FolderToXMLProcessor.class.getName()).log(Level.SEVERE, null, ex);
+                	logger.log(Level.ERROR, null, ex);
 				}
             }
         }
@@ -153,7 +153,7 @@ public class FolderToXMLProcessor {
 					try {
 						pgm = docBuilder.buildFile(outFile);
 					} catch (ParserConfigurationException | SAXException ex) {
-						Logger.getLogger(FolderToXMLProcessor.class.getName()).log(Level.SEVERE, null, ex);
+						logger.log(Level.ERROR, null, ex);
 						olTabelaProgramas.get(j).setStatus("Erro");
 				        return "";
 					}
@@ -167,7 +167,7 @@ public class FolderToXMLProcessor {
 			        return "";
 				}
 			} catch (IOException ex) {
-				Logger.getLogger(FolderToXMLProcessor.class.getName()).log(Level.SEVERE, null, ex);
+				logger.log(Level.ERROR, null, ex);
 			}
 		}
 		return "";
@@ -193,7 +193,7 @@ public class FolderToXMLProcessor {
 		try {
 			results = coordinator.parse(source);
 		} catch (IOException ex) {
-			Logger.getLogger(FolderToXMLProcessor.class.getName()).log(Level.SEVERE, null, ex);
+			logger.log(Level.ERROR, null, ex);
 			return false;
 		}
 
@@ -201,18 +201,18 @@ public class FolderToXMLProcessor {
 
 		if (parse.hasErrors()){
 			for (Tuple<Token, String> error : parse.getErrors())
-				Logger.getLogger(FolderToXMLProcessor.class.getName()).log(Level.SEVERE, null, "Error: " + error.getFirst() + " " + error.getSecond());
+				logger.error("Error: " + error.getFirst() + " " + error.getSecond());
 			return false;
 		}
 
 		if (parse.hasWarnings()){
 			for (Tuple<Token, String> warning : parse.getWarnings())
-				Logger.getLogger(FolderToXMLProcessor.class.getName()).log(Level.SEVERE, null,"Warning: " + warning.getFirst() + " " + warning.getSecond());
+				logger.info("Warning: " + warning.getFirst() + " " + warning.getSecond());
 			return false;
 		}
 
 		if (!results.isValidInput()) {
-			Logger.getLogger(FolderToXMLProcessor.class.getName()).log(Level.SEVERE, null,"Could not parse " + source);
+			logger.error("Could not parse " + source);
 			return false;
 		}
 
@@ -222,8 +222,8 @@ public class FolderToXMLProcessor {
 			XMLSerializer.serialize(ast, target);
 
 		} catch (IOException e) {
-			Logger.getLogger(FolderToXMLProcessor.class.getName()).log(Level.SEVERE, null,"IOException while writing " + target);
-			Logger.getLogger(FolderToXMLProcessor.class.getName()).log(Level.SEVERE, null,e.getMessage());
+			logger.error("IOException while writing " + target);
+			logger.error(e.getMessage());
 			return false;
 		}
 
