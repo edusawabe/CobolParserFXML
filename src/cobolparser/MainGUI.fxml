@@ -40,12 +40,12 @@
                               <Font name="System Bold" size="12.0" />
                            </font>
                         </Label>
-                        <RadioButton fx:id="rbGerarXMLSim" mnemonicParsing="false" text="Sim">
+                        <RadioButton fx:id="rbGerarXMLSim" mnemonicParsing="false" text="Sim" onAction="#rbGerarXMLSimAction">
                            <HBox.margin>
                               <Insets left="10.0" top="15.0" />
                            </HBox.margin>
                         </RadioButton>
-                        <RadioButton fx:id="rbGerarXMLNao" mnemonicParsing="false" text="Não">
+                        <RadioButton fx:id="rbGerarXMLNao" mnemonicParsing="false" text="Não" onAction="#rbGerarXMLNaoAction">
                            <HBox.margin>
                               <Insets left="10.0" top="15.0" />
                            </HBox.margin>
@@ -108,9 +108,10 @@
                   </Label>
                   <TableView fx:id="tvTabProgs" prefHeight="1000.0" prefWidth="800.0">
                     <columns>
+                      <TableColumn fx:id="tcId" prefWidth="20.0" text="#" />
                       <TableColumn fx:id="tcColunaArquivo" maxWidth="-1.0" minWidth="350.0" prefWidth="350.0" text="Arquivo" />
                       <TableColumn fx:id="tcColunaNome" maxWidth="-1.0" minWidth="350.0" prefWidth="350.0" text="Nome Programa" />
-                        <TableColumn fx:id="tcColunaStatus" prefWidth="100.0" text="Status" />
+                      <TableColumn fx:id="tcColunaStatus" prefWidth="100.0" text="Status" />
                     </columns>
                      <VBox.margin>
                         <Insets left="10.0" right="10.0" />
