@@ -11,6 +11,10 @@ import java.util.LinkedList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.xml.parsers.ParserConfigurationException;
+
+import org.xml.sax.SAXException;
+
 import javafx.collections.ObservableList;
 import koopa.cobol.parser.ParseResults;
 import koopa.cobol.parser.ParsingCoordinator;
@@ -88,8 +92,9 @@ public class FolderToXMLProcessor {
 									StatementCreator.generateInsertProgramStatement(pgm.getProgramName(), ""));
 							i++;
 						}
-					} catch (IOException ex) {
+					} catch (IOException | ParserConfigurationException | SAXException ex) {
 						Logger.getLogger(FolderToXMLProcessor.class.getName()).log(Level.SEVERE, null, ex);
+						olTabelaProgramas.get(j).setStatus("Erro");
 					}
 				}
 				olTabelaProgramas.get(j).setStatus("Processado");
@@ -99,16 +104,24 @@ public class FolderToXMLProcessor {
             if (outFile.exists() && !skipExistingFile) {
                 outFile.createNewFile();
                 processFile(folder, outFile, coordinator);
-                pgm = docBuilder.buildFile(outFile);
-                db2Driver.insertUpdateDeleteStatement(StatementCreator.generateInsertProgramStatement(pgm.getProgramName(), ""));
-                programs = programs + pgm.toString();
+                try {
+					pgm = docBuilder.buildFile(outFile);
+	                db2Driver.insertUpdateDeleteStatement(StatementCreator.generateInsertProgramStatement(pgm.getProgramName(), ""));
+	                programs = programs + pgm.toString();
+                } catch (ParserConfigurationException | SAXException ex) {
+                	Logger.getLogger(FolderToXMLProcessor.class.getName()).log(Level.SEVERE, null, ex);
+				}
             }
             if (!outFile.exists()) {
                 outFile.createNewFile();
                 processFile(folder, outFile, coordinator);
-                pgm = docBuilder.buildFile(outFile);
-                programs = programs + pgm.toString();
-                db2Driver.insertUpdateDeleteStatement(StatementCreator.generateInsertProgramStatement(pgm.getProgramName(), ""));
+                try {
+					pgm = docBuilder.buildFile(outFile);
+	                programs = programs + pgm.toString();
+	                db2Driver.insertUpdateDeleteStatement(StatementCreator.generateInsertProgramStatement(pgm.getProgramName(), ""));
+                } catch (ParserConfigurationException | SAXException ex) {
+                	Logger.getLogger(FolderToXMLProcessor.class.getName()).log(Level.SEVERE, null, ex);
+				}
             }
         }
         processResult  = programs;
@@ -122,6 +135,7 @@ public class FolderToXMLProcessor {
         int j = file;
         CobolProgram pgm = new CobolProgram();
         int i = 0;
+        boolean resultOK = true;
 
 		File lFile1 = new File(olTabelaProgramas.get(j).getArquivo());
 		if ((!lFile1.getName().endsWith(".xml")) && (lFile1.isFile())) {
@@ -129,78 +143,91 @@ public class FolderToXMLProcessor {
 			try {
 				if (outFile.exists() && !skipExistingFile) {
 					outFile.createNewFile();
-					processFile(lFile1, outFile, coordinator);
+					resultOK = processFile(lFile1, outFile, coordinator);
 				}
 				if (!outFile.exists()) {
 					outFile.createNewFile();
-					processFile(lFile1, outFile, coordinator);
-					pgm = docBuilder.buildFile(outFile);
+					resultOK = processFile(lFile1, outFile, coordinator);
 				}
-				pgm = docBuilder.buildFile(outFile);
-				db2Driver.insertUpdateDeleteStatement(
-						StatementCreator.generateInsertProgramStatement(pgm.getProgramName(), ""));
-
+				if(resultOK){
+					try {
+						pgm = docBuilder.buildFile(outFile);
+					} catch (ParserConfigurationException | SAXException ex) {
+						Logger.getLogger(FolderToXMLProcessor.class.getName()).log(Level.SEVERE, null, ex);
+						olTabelaProgramas.get(j).setStatus("Erro");
+				        return "";
+					}
+					olTabelaProgramas.get(j).setStatus("Processado");
+					db2Driver.insertUpdateDeleteStatement(
+							StatementCreator.generateInsertProgramStatement(pgm.getProgramName(), ""));
+			        return pgm.toString();
+				}
+				else {
+					olTabelaProgramas.get(j).setStatus("Erro");
+			        return "";
+				}
 			} catch (IOException ex) {
 				Logger.getLogger(FolderToXMLProcessor.class.getName()).log(Level.SEVERE, null, ex);
 			}
 		}
-		olTabelaProgramas.get(j).setStatus("Processado");
-        return pgm.toString();
+		return "";
     }
 
-    private void processFile(File source, File target, ParsingCoordinator coordinator){
-        //System.out.println("Processing " + source);
+    private boolean processFile(File source, File target, ParsingCoordinator coordinator){
+		String targetPath = target.getPath();
+		int dot = targetPath.lastIndexOf('.');
+		if (dot < 0)
+			targetPath = targetPath + ".xml";
+		else
+			targetPath = targetPath.substring(0, dot) + ".xml";
 
-        String targetPath = target.getPath();
-        int dot = targetPath.lastIndexOf('.');
-        if (dot < 0)
-                targetPath = targetPath + ".xml";
-        else
-                targetPath = targetPath.substring(0, dot) + ".xml";
+		target = new File(targetPath);
+		// System.out.println("Writing XML to " + target);
 
-        target = new File(targetPath);
-        //System.out.println("Writing XML to " + target);
+		File targetFolder = target.getParentFile();
+		if (targetFolder != null && !targetFolder.exists())
+			targetFolder.mkdirs();
 
-        File targetFolder = target.getParentFile();
-        if (targetFolder != null && !targetFolder.exists())
-                targetFolder.mkdirs();
+		ParseResults results = null;
 
-        ParseResults results = null;
+		try {
+			results = coordinator.parse(source);
+		} catch (IOException ex) {
+			Logger.getLogger(FolderToXMLProcessor.class.getName()).log(Level.SEVERE, null, ex);
+			return false;
+		}
 
-        try {
-                results = coordinator.parse(source);
+		Parse parse = results.getParse();
 
-        } catch (IOException e) {
-                System.out.println("IOException while reading " + source);
-        }
+		if (parse.hasErrors()){
+			for (Tuple<Token, String> error : parse.getErrors())
+				Logger.getLogger(FolderToXMLProcessor.class.getName()).log(Level.SEVERE, null, "Error: " + error.getFirst() + " " + error.getSecond());
+			return false;
+		}
 
-        Parse parse = results.getParse();
+		if (parse.hasWarnings()){
+			for (Tuple<Token, String> warning : parse.getWarnings())
+				Logger.getLogger(FolderToXMLProcessor.class.getName()).log(Level.SEVERE, null,"Warning: " + warning.getFirst() + " " + warning.getSecond());
+			return false;
+		}
 
-        if (parse.hasErrors())
-                for (Tuple<Token, String> error : parse.getErrors())
-                        System.out.println("Error: " + error.getFirst() + " "
-                                        + error.getSecond());
+		if (!results.isValidInput()) {
+			Logger.getLogger(FolderToXMLProcessor.class.getName()).log(Level.SEVERE, null,"Could not parse " + source);
+			return false;
+		}
 
-        if (parse.hasWarnings())
-                for (Tuple<Token, String> warning : parse.getWarnings())
-                        System.out.println("Warning: " + warning.getFirst() + " "
-                                        + warning.getSecond());
+		final Tree ast = results.getParse().getTarget(KoopaTreeBuilder.class).getTree();
 
-        if (!results.isValidInput()) {
-                System.out.println("Could not parse " + source);
-                return;
-        }
+		try {
+			XMLSerializer.serialize(ast, target);
 
-        final Tree ast = results.getParse().getTarget(KoopaTreeBuilder.class)
-                        .getTree();
+		} catch (IOException e) {
+			Logger.getLogger(FolderToXMLProcessor.class.getName()).log(Level.SEVERE, null,"IOException while writing " + target);
+			Logger.getLogger(FolderToXMLProcessor.class.getName()).log(Level.SEVERE, null,e.getMessage());
+			return false;
+		}
 
-        try {
-                XMLSerializer.serialize(ast, target);
-
-        } catch (IOException e) {
-                System.out.println("IOException while writing " + target);
-                System.out.println(e.getMessage());
-        }
+		return true;
     }
 
 	public File getFolder() {
