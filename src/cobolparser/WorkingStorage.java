@@ -14,6 +14,7 @@ import java.util.LinkedList;
 public class WorkingStorage {
     private LinkedList<String> copyList;
     private LinkedList<String> sqlList;
+    private LinkedList<String> arqList;
     private LinkedList<CobolElement> wrkList;
     private LinkedList<TableElement> tableList;
     private LinkedList<ColumnElement> collumsList;
@@ -21,6 +22,7 @@ public class WorkingStorage {
     public WorkingStorage(){
         copyList = new LinkedList<>();
         sqlList = new LinkedList<>();
+        arqList = new LinkedList<>();
         wrkList = new LinkedList<>();
         tableList = new LinkedList<>();
         collumsList = new LinkedList<>();
@@ -56,7 +58,7 @@ public class WorkingStorage {
         }
         return null;
     }
-    
+
     public CobolElement getElement(String name){
         for (int i = 0; i < wrkList.size(); i++) {
             if(wrkList.get(i).getName().equals(name)){
@@ -79,11 +81,11 @@ public class WorkingStorage {
     public LinkedList<ColumnElement> getCollumsList() {
         return collumsList;
     }
-    
+
     public void addColumn(String c, LinkedList<TableElement> lTable) {
         c = Util.getColumnString(c);
         ColumnElement column = new ColumnElement();
-        
+
         if (Util.accptedValue(c)){
             if (c.contains(".")) {
                 String saux[] = c.split("\\.");
@@ -112,31 +114,31 @@ public class WorkingStorage {
             }
             if (add) {
                 getCollumsList().add(column);
-            }  
+            }
         }
     }
     /**
      * @param o = Table Owner
      * @param n = Table Name
-     * @param a = Table Alias 
+     * @param a = Table Alias
      * @return void
-     */    
+     */
     public void addTable(String o, String n, String a) {
         boolean add = true;
         TableElement toAdd = new TableElement();
         toAdd.setOwnerName(o);
         toAdd.setAliasName(a);
         toAdd.setTableName(n);
-        
+
         for (TableElement tableItem : tableList) {
             if(tableItem.equals(toAdd))
                 add = false;
         }
         if (add){
             tableList.add(toAdd);
-        }    
+        }
     }
-    
+
     public void addCopy(String cpy){
         boolean add = true;
         for (String cpyItem : copyList) {
@@ -147,7 +149,7 @@ public class WorkingStorage {
             copyList.add(cpy);
         }
     }
-    
+
     public void addSql(String sql){
         boolean add = true;
         for (String sqlItem : sqlList) {
@@ -158,4 +160,12 @@ public class WorkingStorage {
             copyList.add(sql);
         }
     }
+
+	public LinkedList<String> getArqList() {
+		return arqList;
+	}
+
+	public void setArqList(LinkedList<String> arqList) {
+		this.arqList = arqList;
+	}
 }

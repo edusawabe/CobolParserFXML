@@ -27,30 +27,23 @@ public class MyDocumentBuilder {
     public MyDocumentBuilder() {
     }
 
-    public CobolProgram buildFile(File file) {
-        CobolProgram pgm = new CobolProgram();
-        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-        DocumentBuilder docBuilder;
+	public CobolProgram buildFile(File file) throws ParserConfigurationException, SAXException, IOException {
+		CobolProgram pgm = new CobolProgram();
+		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+		DocumentBuilder docBuilder;
 
-        try {
-            docBuilder = dbf.newDocumentBuilder();
-            //realiza parse do arquivo
-            Document doc = docBuilder.parse(file);
-            //otem documento
-            Element element = doc.getDocumentElement();
-            buildFileWorkigStorage(pgm, element);
-            buildFileProcedureDivisionProgramCalls(pgm, element);
-            buildProgramCalls(pgm, element);
-            buildDB2Elments(pgm, element);
-        } catch (ParserConfigurationException ex) {
-            Logger.getLogger(MyDocumentBuilder.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (SAXException ex) {
-            Logger.getLogger(MyDocumentBuilder.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IOException ex) {
-            Logger.getLogger(MyDocumentBuilder.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        return pgm;
-    }
+		docBuilder = dbf.newDocumentBuilder();
+		// realiza parse do arquivo
+		Document doc = docBuilder.parse(file);
+		// otem documento
+		Element element = doc.getDocumentElement();
+		buildFileWorkigStorage(pgm, element);
+		buildFileProcedureDivisionProgramCalls(pgm, element);
+		buildProgramCalls(pgm, element);
+		buildDB2Elments(pgm, element);
+
+		return pgm;
+	}
 
     private void buildFileWorkigStorage(CobolProgram pgm, Element element) {
         //obtem nome do programa
@@ -62,6 +55,9 @@ public class MyDocumentBuilder {
 
         //obtem node da WORKING STAORAGE SECTION
         Element workingStorage = (Element) element.getElementsByTagName("workingStorageSection").item(0);
+
+        //obtem node da WORKING STAORAGE SECTION
+        Element dataDivision = (Element) element.getElementsByTagName("dataDivision").item(0);
 
         //obtem node da PROCEDURE DIVISION
         Element procedureDivision = (Element) element.getElementsByTagName("procedureDivision").item(0);
@@ -143,6 +139,22 @@ public class MyDocumentBuilder {
                 pgm.getWrkSection().addSql(pgmVar);
             }
         }
+
+      //obtem LISTA DE DATASET NAMES da WORKING STAORAGE SECTION
+        NodeList fileList = dataDivision.getElementsByTagName("fdFileDescriptionEntry");
+        for (int i = 0; i < fileList.getLength(); i++) {
+            Element e = (Element) fileList.item(i);
+            Element fileName = (Element) e.getElementsByTagName("fileName").item(0);
+            Element cobolWord = (Element) fileName.getElementsByTagName("cobolWord").item(0);
+            if (cobolWord != null) {
+                String ddName;
+                ddName = cobolWord.getElementsByTagName("t").item(0).getTextContent();
+                ddName = ddName.replace('\n', ' ');
+                ddName = ddName.replace('\'', ' ');
+                ddName = ddName.replaceAll(" ", "");
+                pgm.getWrkSection().getArqList().add(ddName);
+            }
+        }
     }
 
     private void buildDB2Elments(CobolProgram pgm, Element element) {
@@ -162,7 +174,7 @@ public class MyDocumentBuilder {
             Element e = (Element) declareList.item(i);
             Element selectStatement = (Element) e.getElementsByTagName("selectStatement").item(0);
             if (selectStatement != null) {
-                //obtem nome das tabelas 
+                //obtem nome das tabelas
                 NodeList elementsT = selectStatement.getElementsByTagName("t");
                 boolean fromStatement = false;
                 boolean whereStatement = false;
@@ -308,7 +320,7 @@ public class MyDocumentBuilder {
             Element e = (Element) declareList.item(i);
             Element updateStatement = (Element) e.getElementsByTagName("updateStatement").item(0);
             if (updateStatement != null) {
-                //obtem nome das tabelas 
+                //obtem nome das tabelas
                 NodeList elementsT = updateStatement.getElementsByTagName("t");
                 String owner = "";
                 String tableName = "";
@@ -355,7 +367,7 @@ public class MyDocumentBuilder {
             Element e = (Element) declareList.item(i);
             Element insertStatement = (Element) e.getElementsByTagName("insertStatement").item(0);
             if (insertStatement != null) {
-                //obtem nome das tabelas 
+                //obtem nome das tabelas
                 NodeList elementsT = insertStatement.getElementsByTagName("t");
                 String owner = "";
                 String tableName = "";
@@ -406,7 +418,7 @@ public class MyDocumentBuilder {
             Element e = (Element) declareList.item(i);
             Element deleteStatement = (Element) e.getElementsByTagName("deleteStatement").item(0);
             if (deleteStatement != null) {
-                //obtem nome das tabelas 
+                //obtem nome das tabelas
                 NodeList elementsT = deleteStatement.getElementsByTagName("t");
                 String owner = "";
                 String tableName = "";
